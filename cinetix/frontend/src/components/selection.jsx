@@ -199,7 +199,7 @@ const SeatSelection = () => {
   const movieDetails = showData && showData.movie && showData.theater ? {
     id: showData.movie._id,
     title: showData.movie.title,
-    image: "/api/placeholder/320/180", // Placeholder for demo
+    image: showData.movie.image, 
     theatre: `${showData.theater.name} - ${showData.screen}`,
     rating: showData.movie.rating,
     duration: showData.movie.duration
