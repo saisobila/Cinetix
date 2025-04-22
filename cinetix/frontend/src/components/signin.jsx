@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 const Signin = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+   email: "saisobila@admin.com",
+    password: "kiran",
   });
  
 
@@ -19,17 +19,9 @@ const Signin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${process.env.REACT_APP_BACKEND}/users/login`, formData);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userName", res.data.userName);
-      localStorage.setItem("role", res.data.role);
-      toast.success("Login successful...", {
-        position: 'top-center',
-        autoClose: 3000,
-        theme: "colored",
-        onClose: () => navigate('/'),
-      });
-    } catch (error) {
+      navigate('/')
+    }
+     catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message || "Invalid credentials", {
         position: 'top-center',

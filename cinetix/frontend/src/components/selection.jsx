@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 
 const SeatSelection = () => {
@@ -26,81 +25,36 @@ const SeatSelection = () => {
   const { id } = location.state || {};
   const token = localStorage.getItem("token");
   
+  // Static data for showData
+  const staticShowData = {
+    movie: {
+      _id: "movieId",
+      title: "Sample Movie",
+      image: "sample-image-url.jpg",
+      rating: "PG-13",
+      duration: "2h 30m",
+      releaseDate: "2023-10-01",
+    },
+    theater: {
+      _id: "theaterId",
+      name: "Sample Theater",
+    },
+    screen: "Screen 1",
+    seatMap: [["A", "B", "C"], ["D", "E", "F"]], // Example seat map
+  };
+
+  // Static data for bookingData
+  const staticBookingData = [
+    { seats: ["A1", "A2"] },
+    { seats: ["B1"] },
+  ];
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([fetchShowData(), fetchBookingData()]);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Failed to load seat data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    // Use setTimeout to simulate loading
-    const timer = setTimeout(() => {
-      loadData();
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, [id]);
-
-  const fetchShowData = async () => {
-    try {
-      if (!id) {
-        throw new Error("Show ID is missing");
-      }
-      
-      const res = await axios.get(`${process.env.REACT_APP_BACKEND}/showtime/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (res.data && res.data.data) {
-        setShowData(res.data.data);
-        console.log("Show data:", res.data.data);
-        return res.data.data;
-      } else {
-        throw new Error("Invalid response format");
-      }
-    } catch (error) {
-      console.error("Error fetching show data:", error);
-      const errorMessage = error.response?.data?.message || "Failed to fetch show data.";
-      toast.error(errorMessage);
-      throw error;
-    }
-  };
-
-  const fetchBookingData = async () => {
-    try {
-      if (!id) {
-        throw new Error("Show ID is missing");
-      }
-      
-      const res = await axios.get(`${process.env.REACT_APP_BACKEND}/booking/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (res.data && res.data.data) {
-        setBookingData(res.data.data);
-        console.log("Booking data:", res.data.data);
-        return res.data.data;
-      } else {
-        throw new Error("Invalid response format");
-      }
-    } catch (error) {
-      console.error("Error fetching booking data:", error);
-      const errorMessage = error.response?.data?.message || "Failed to fetch booking data.";
-      toast.error(errorMessage);
-      // Return empty array for bookings if there's an error
-      setBookingData([]);
-      throw error;
-    }
-  };
+    // Replace API calls with static data
+    setShowData(staticShowData);
+    setBookingData(staticBookingData);
+    setIsLoading(false);
+  }, []);
   
   // Generate dates starting from release date
   const generateDates = () => {

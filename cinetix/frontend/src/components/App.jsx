@@ -35,7 +35,7 @@ function App() {
     <Route element={<Signup/>} path='/signup' />
     <Route element={<SeatSelection/>} path='/seatselection' />
     <Route element={<MovieCheckout/>} path='/payment' />
-    <Route element={<MovieAdminDashboard/>} path='/admindashboard' />
+    <Route element={<MovieAdminDashboard/>} path='/admin' />
     </Routes>
     </BrowserRouter>
   );

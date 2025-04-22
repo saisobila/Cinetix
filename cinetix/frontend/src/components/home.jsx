@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Modal from "./Model.jsx"
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
+import Modal from "./Model.jsx";
 
 const Home = () => {
   const [user, setUser] = useState({
@@ -21,7 +19,7 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isLoggedIn = !!user?.name; 
   const [movieData, setMovieData] = useState([]);
-
+  const [isAdminPromptOpen, setIsAdminPromptOpen] = useState(false);
 
   const handleAvatarClick = () => {
     setIsModalOpen(true); // Open the modal
@@ -45,8 +43,6 @@ const Home = () => {
     navigate("/signin");
   };
 
-  
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -64,44 +60,37 @@ const Home = () => {
     }
   }, []); 
 
-  const fetchMovies = async() => {
-    try {
-      const res = await axios.get(`${process.env.REACT_APP_BACKEND}/showtime`);
-      const movies = res.data.data.map((item) => ({
-        id: item._id, // Use the _id from the API data
-        showtime: item._id,
-        movie: item.movie._id,
-        theater: item.theater._id,
-        title: item.movie.title,
-        theatre: item.theater.name, // Use the theater name
-        image: item.movie.image,
-        rating: item.movie.rating,
-        genre: item.movie.genre,
-        duration: item.movie.duration,
-        releaseDate: item.movie.releaseDate.split("-")[0], // Extract the year only
-        director: item.movie.director,
-        price: item.movie.price,
-        status: item.movie.status,
-      }));
-      setMovieData([...movies]);  
-      console.log(...movies);    
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  useEffect(() => {
+    const nowShowingMovies = movies.map(movie => ({
+      ...movie,
+      status: "nowShowing"
+    }));
+    
+    const upcomingMoviesWithStatus = upcomingMovies.map(movie => ({
+      ...movie,
+      status: "upcoming"
+    }));
+    
+    const recommendedMoviesWithStatus = recommendedMovies.map(movie => ({
+      ...movie,
+      status: "recommended"
+    }));
+    
+    setMovieData([
+      ...nowShowingMovies,
+      ...upcomingMoviesWithStatus,
+      ...recommendedMoviesWithStatus
+    ]);
+  }, []);
 
   useEffect(() => {
-    fetchMovies(); 
+    // Show the admin prompt only once when the component mounts
+    setIsAdminPromptOpen(true);
   }, []);
 
   const onClickBook = (id) => {
-    if (localStorage.getItem("token")) {
-      navigate("/seatselection", { state: { id: id } });
-      return; // Prevent further execution
-    }
-    toast.error("Please login ...");
+      navigate("/seatselection", { state: { id: id } }); // Prevent further execution
   };
-  
   
   const movies = [
     { 
@@ -208,7 +197,8 @@ const Home = () => {
   ];
   
   const displayMovies = activeTab === "nowShowing" ? movieData.filter((movie) => movie.status === "nowShowing") : 
-                       activeTab === "upcoming" ? movieData.filter((movie) => movie.status === "upcoming") : movieData.filter((movie) => movie.status === "recommended");
+                         activeTab === "upcoming" ? movieData.filter((movie) => movie.status === "upcoming") : 
+                         movieData.filter((movie) => movie.status === "recommended");
   
   const filteredMovies = displayMovies.filter(movie => 
     movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -236,6 +226,7 @@ const Home = () => {
         >
           CineTix
         </motion.div>
+        <span style={{color: "white", marginTop: -20}}>by Sudhakiran</span>
         <motion.div
           animate={{ 
             rotate: 360,
@@ -277,6 +268,15 @@ const Home = () => {
             <span className="text-red-600 text-3xl font-bold mr-1">Cine</span>
             <span className="text-white text-3xl font-bold">Tix</span>
           </motion.div>
+
+          {/* Admin Button */}
+          <motion.button
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300 ml-2"
+            onClick={() => navigate("/admin")}
+            whileHover={{ scale: 1.05 }}
+          >
+           Go to Admin
+          </motion.button>
           
           <div className="relative max-w-md w-full mx-4 hidden md:block">
             <input
@@ -300,8 +300,8 @@ const Home = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-           
-           <motion.div
+            {/* Avatar and User Info */}
+            <motion.div
               className="flex items-center space-x-2 cursor-pointer"
               whileHover={{ scale: 1.05 }}
               onClick={handleAvatarClick}
@@ -344,6 +344,44 @@ const Home = () => {
                 </button>
               </div>
             )}
+          </Modal>
+        </div>
+      )}
+
+      {/* Admin Prompt Modal */}
+      {isAdminPromptOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm">
+          <Modal onClose={() => setIsAdminPromptOpen(false)} className="rounded-lg shadow-lg bg-gray-800 p-6">
+            <div className="text-center">
+              <motion.h2 
+                className="text-2xl font-bold mb-4 text-red-600"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+               Free Admin Panel Access
+              </motion.h2>
+              <p className="mb-6" style={{color: "black"}}>Would you like to go to the admin panel?</p>
+              <div className="flex justify-center space-x-4">
+                <motion.button
+                  onClick={() => {
+                    navigate("/admin");
+                    setIsAdminPromptOpen(false); // Close the modal after navigation
+                  }}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Go to Admin
+                </motion.button>
+                <motion.button
+                  onClick={() => setIsAdminPromptOpen(false)} // Close the modal without navigating
+                  className="mt-2 text-gray-300 hover:text-white border border-gray-600 px-4 py-2 rounded-md transition duration-300"
+                  whileHover={{ scale: 1.05 }}
+                style={{color: "black"}} >
+                  Maybe Later
+                </motion.button>
+              </div>
+            </div>
           </Modal>
         </div>
       )}
